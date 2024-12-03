@@ -12,7 +12,7 @@ except FileNotFoundError:
     long_description = ""
 
 setup(
-    name="pagseguro-payment-framework",
+    name="pagseguro",
     version="0.1.0",
     author="Miguel Ilha",
     author_email="miguel@isla.software",
