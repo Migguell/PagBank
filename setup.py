@@ -19,7 +19,8 @@ setup(
     description="Framework for integration with payment gateways, with initial support for PagSeguro",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    packages=find_packages(exclude=["tests*"]),
+    package_dir={"pagseguro": "payments"},
+    packages=["pagseguro"],
     install_requires=requirements,
     python_requires=">=3.7",
     classifiers=[
