@@ -53,9 +53,9 @@ class AuthenticationMethod:
 class CardData:
     number: str
     security_code: str
-    expiration_date: str = None
-    exp_month: int = None
-    exp_year: int = None
+    expiration_date: Optional[str] = None
+    exp_month: Optional[int] = None
+    exp_year: Optional[int] = None
     holder: Optional[CardHolder] = None
     store: Optional[bool] = None
     authentication_method: Optional[AuthenticationMethod] = None
@@ -68,6 +68,9 @@ class CardData:
                 self.exp_year = date.year
             except ValueError:
                 raise ValueError("Data de expiração inválida. Use o formato YYYY-MM")
+        
+        if not (self.exp_month and self.exp_year):
+            raise ValueError("Mês e ano de expiração são obrigatórios")
 
 @dataclass
 class PaymentAmount:
