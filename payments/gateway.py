@@ -61,7 +61,7 @@ class CardData:
 @dataclass
 class PaymentAmount:
     value: int
-    currency: str
+    currency: str = "BRL"
 
 @dataclass
 class ChargeConfig:
