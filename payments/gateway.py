@@ -3,6 +3,7 @@ from dataclasses import dataclass, asdict
 from enum import Enum
 import os
 import requests
+from .validators import PaymentValidators
 
 class PaymentMethod(Enum):
     CREDIT_CARD = "CREDIT_CARD"
@@ -97,6 +98,8 @@ class PagSeguroPayment:
         }
 
     def _build_card_payment(self, payment_method: PaymentMethod, card_data: CardData, payment_config: PaymentConfig) -> Dict:
+        PaymentValidators.validate_payment_method(payment_method, asdict(card_data))
+        
         payment_method_data = {
             "type": payment_method.value,
             "card": {
@@ -117,17 +120,27 @@ class PagSeguroPayment:
                 "soft_descriptor": payment_config.soft_descriptor
             })
         elif payment_method == PaymentMethod.DEBIT_CARD:
-            if not card_data.holder:
-                raise ValueError("Holder information is required for debit card payments")
-            if not card_data.authentication_method:
-                raise ValueError("Authentication method is required for debit card payments")
             payment_method_data["authentication_method"] = asdict(card_data.authentication_method)
 
         return payment_method_data
 
     def create_payment(self, customer: Customer, address: Address, items: List[Item],
                       payment_method: PaymentMethod, payment_config: PaymentConfig,
-                      card_data: CardData) -> Dict:
+                      card_data: Optional[CardData] = None) -> Dict:
+        
+        PaymentValidators.validate_customer_data(asdict(customer))
+        PaymentValidators.validate_address(asdict(address))
+        PaymentValidators.validate_payment_config(asdict(payment_config))
+        
+        if card_data and payment_method in [PaymentMethod.CREDIT_CARD, PaymentMethod.DEBIT_CARD]:
+            PaymentValidators.validate_card_data(asdict(card_data))
+            
+            if payment_method == PaymentMethod.CREDIT_CARD and payment_config.installments:
+                PaymentValidators.validate_installments(payment_config.installments)
+        
+        if payment_method == PaymentMethod.PIX:
+            pix_expiration = os.getenv('PIX_EXPIRATION_DATE')
+            PaymentValidators.validate_pix_expiration(pix_expiration)
         
         base_payment_data = {
             "customer": asdict(customer),
