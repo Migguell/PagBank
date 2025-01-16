@@ -1,8 +1,10 @@
 import re
+import sys
+from pathlib import Path
 from typing import Dict, Union, Optional, Any, List
 from datetime import datetime
 from enum import Enum
-from .gateway import PaymentMethod
+from .enums import PaymentMethod
 
 class PaymentMethod(Enum):
     CREDIT_CARD = "CREDIT_CARD"

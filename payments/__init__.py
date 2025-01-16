@@ -13,6 +13,7 @@ from .gateway import (
     AuthenticationMethod
 )
 from .validators import PaymentValidators
+from .enums import PaymentMethod
 
 __version__ = "0.1.0"
 __author__ = "Miguel Ilha"

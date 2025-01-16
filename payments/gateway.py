@@ -4,11 +4,7 @@ from enum import Enum
 import os
 import requests
 from .validators import PaymentValidators
-
-class PaymentMethod(Enum):
-    CREDIT_CARD = "CREDIT_CARD"
-    DEBIT_CARD = "DEBIT_CARD"
-    PIX = "PIX"
+from .enums import PaymentMethod
 
 @dataclass
 class Phone:
