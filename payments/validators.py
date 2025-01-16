@@ -6,11 +6,6 @@ from datetime import datetime
 from enum import Enum
 from .enums import PaymentMethod
 
-class PaymentMethod(Enum):
-    CREDIT_CARD = "CREDIT_CARD"
-    DEBIT_CARD = "DEBIT_CARD"
-    PIX = "PIX"
-
 class PaymentValidators:
     @staticmethod
     def validate_cpf(cpf: str) -> bool:

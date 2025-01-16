@@ -1,6 +1,5 @@
 from typing import Dict, Optional, List
 from dataclasses import dataclass, asdict
-from enum import Enum
 import os
 import requests
 from .validators import PaymentValidators
