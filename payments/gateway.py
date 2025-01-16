@@ -4,6 +4,7 @@ import os
 import requests
 from .validators import PaymentValidators
 from .enums import PaymentMethod
+from datetime import datetime
 
 @dataclass
 class Phone:
@@ -51,12 +52,22 @@ class AuthenticationMethod:
 @dataclass
 class CardData:
     number: str
-    exp_month: int
-    exp_year: int
     security_code: str
+    expiration_date: str = None
+    exp_month: int = None
+    exp_year: int = None
     holder: Optional[CardHolder] = None
     store: Optional[bool] = None
     authentication_method: Optional[AuthenticationMethod] = None
+
+    def __post_init__(self):
+        if self.expiration_date and not (self.exp_month and self.exp_year):
+            try:
+                date = datetime.strptime(self.expiration_date, '%Y-%m')
+                self.exp_month = date.month
+                self.exp_year = date.year
+            except ValueError:
+                raise ValueError("Data de expiração inválida. Use o formato YYYY-MM")
 
 @dataclass
 class PaymentAmount:
