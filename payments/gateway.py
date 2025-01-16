@@ -5,6 +5,7 @@ import requests
 from .validators import PaymentValidators
 from .enums import PaymentMethod
 from datetime import datetime
+import uuid
 
 @dataclass
 class Phone:
@@ -100,6 +101,14 @@ class PagSeguroPayment:
         if not self.token:
             raise ValueError("PAGSEGURO_TOKEN não configurado")
 
+    def _convert_expiration_date(self, expiration_date: str) -> tuple:
+        """Converte data no formato YYYY-MM para exp_month e exp_year"""
+        try:
+            date = datetime.strptime(expiration_date, '%Y-%m')
+            return date.month, date.year
+        except ValueError:
+            raise ValueError("Data de expiração inválida. Use o formato YYYY-MM")
+
     def _build_headers(self):
         return {
             "Authorization": f"Bearer {self.token}",
@@ -132,6 +141,77 @@ class PagSeguroPayment:
             payment_method_data["authentication_method"] = asdict(card_data.authentication_method)
 
         return payment_method_data
+
+    def process_payment(self, payment_data: dict):
+        """
+        Processa um pagamento usando o PagBank/PagSeguro
+        """
+        try:
+            payment_method = PaymentMethod[payment_data.get('payment_method')]
+            
+            customer = Customer(
+                name=payment_data['customer']['name'],
+                email=payment_data['customer']['email'],
+                tax_id=payment_data['customer']['tax_id'],
+                phones=payment_data['customer'].get('phones', [])
+            )
+            
+            address = Address(
+                street=payment_data['shipping']['address']['street'],
+                number=payment_data['shipping']['address']['number'],
+                locality=payment_data['shipping']['address']['locality'],
+                city=payment_data['shipping']['address']['city'],
+                region_code=payment_data['shipping']['address']['region_code'],
+                country=payment_data['shipping']['address'].get('country', 'BRL'),
+                postal_code=payment_data['shipping']['address']['postal_code']
+            )
+
+            # Criar item baseado no amount
+            items = [
+                Item(
+                    name="Pagamento",
+                    quantity=1,
+                    unit_amount=int(payment_data['amount'] * 100)  # converter para centavos
+                )
+            ]
+
+            payment_config = PaymentConfig(
+                amount=PaymentAmount(value=int(payment_data['amount'] * 100)),  # converter para centavos
+                charge=ChargeConfig(
+                    reference_id=str(uuid.uuid4()),
+                    description='Pagamento via PagBank'
+                ),
+                installments=payment_data.get('installments', 1)
+            )
+            
+            exp_month, exp_year = self._convert_expiration_date(payment_data['card_data']['expiration_date'])
+            
+            card_holder = CardHolder(
+                name=payment_data['card_data']['owner'],
+                tax_id=payment_data['customer']['tax_id'],
+                email=payment_data['customer']['email']
+            )
+            
+            card_data = CardData(
+                number=payment_data['card_data']['number'],
+                security_code=payment_data['card_data']['cvv'],
+                exp_month=exp_month,
+                exp_year=exp_year,
+                holder=card_holder,
+                authentication_method=payment_data['card_data']['authentication_method']
+            )
+            
+            return self.create_payment(
+                customer=customer,
+                address=address,
+                items=items,
+                payment_method=payment_method,
+                payment_config=payment_config,
+                card_data=card_data
+            )
+            
+        except Exception as e:
+            raise ValueError(f"Erro ao processar pagamento: {str(e)}")
 
     def create_payment(self, customer: Customer, address: Address, items: List[Item],
                       payment_method: PaymentMethod, payment_config: PaymentConfig,
