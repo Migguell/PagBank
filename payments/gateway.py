@@ -27,8 +27,8 @@ class Address:
     locality: str
     city: str
     region_code: str
-    country: str = 'BR'
     postal_code: str
+    country: str = 'BR'
 
 @dataclass
 class Customer:
