@@ -27,7 +27,7 @@ class Address:
     locality: str
     city: str
     region_code: str
-    country: str
+    country: str = 'BR'
     postal_code: str
 
 @dataclass
@@ -145,7 +145,7 @@ class PagSeguroPayment:
                 locality=payment_data['shipping']['address']['locality'],
                 city=payment_data['shipping']['address']['city'],
                 region_code=payment_data['shipping']['address']['region_code'],
-                country=payment_data['shipping']['address'].get('country', 'BRL'),
+                country=payment_data['shipping']['address'].get('country', 'BR'),
                 postal_code=payment_data['shipping']['address']['postal_code']
             )
 
