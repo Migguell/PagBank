@@ -105,18 +105,28 @@ class PaymentValidators:
             raise ValueError("CVV é obrigatório")
         
         # Validação da data de expiração
-        expiration_date = card_data.get('expiration_date')
-        if expiration_date:
-            try:
-                exp_date = datetime.strptime(expiration_date, '%Y-%m')
-                if exp_date < datetime.now():
-                    raise ValueError("Cartão expirado")
-            except ValueError:
-                raise ValueError("Data de expiração inválida. Use o formato YYYY-MM")
-        else:
-            raise ValueError("Data de expiração do cartão é obrigatória")
+        if not card_data.get('exp_month') or not card_data.get('exp_year'):
+            raise ValueError("Mês e ano de expiração são obrigatórios")
+            
+        # Validar formato e validade da data
+        try:
+            exp_month = int(card_data['exp_month'])
+            exp_year = int(card_data['exp_year'])
+            
+            if not (1 <= exp_month <= 12):
+                raise ValueError("Mês de expiração inválido")
+                
+            current_date = datetime.now()
+            if exp_year < current_date.year:
+                raise ValueError("Cartão expirado")
+            
+            if exp_year == current_date.year and exp_month < current_date.month:
+                raise ValueError("Cartão expirado")
+                
+        except (TypeError, ValueError):
+            raise ValueError("Formato de data de expiração inválido")
         
-        if not card_data.get('owner'):
+        if not card_data.get('holder'):
             raise ValueError("Nome do titular do cartão é obrigatório")
         
         return True
