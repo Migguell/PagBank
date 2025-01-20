@@ -185,9 +185,9 @@ class PagSeguroPayment:
             
             card_data = CardData(
                 number=payment_data['card_data']['number'],
-                security_code=payment_data['card_data']['cvv'],
-                exp_month=exp_month,
-                exp_year=exp_year,
+                cvv=payment_data['card_data']['cvv'],
+                exp_month=payment_data['card_data']['exp_month'],
+                exp_year=payment_data['card_data']['exp_year'],
                 holder=card_holder,
                 authentication_method=payment_data['card_data']['authentication_method']
             )
