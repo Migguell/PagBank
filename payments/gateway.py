@@ -53,10 +53,9 @@ class AuthenticationMethod:
 @dataclass
 class CardData:
     number: str
-    security_code: str
-    expiration_date: Optional[str] = None
-    exp_month: Optional[int] = None
-    exp_year: Optional[int] = None
+    exp_month: int
+    exp_year: int
+    cvv: str
     holder: Optional[CardHolder] = None
     store: Optional[bool] = None
     authentication_method: Optional[AuthenticationMethod] = None
@@ -124,7 +123,7 @@ class PagSeguroPayment:
                 "number": card_data.number,
                 "exp_month": card_data.exp_month,
                 "exp_year": card_data.exp_year,
-                "security_code": card_data.security_code,
+                "cvv": card_data.cvv,
             }
         }
 
