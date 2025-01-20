@@ -92,14 +92,6 @@ class PagSeguroPayment:
         if not self.token:
             raise ValueError("PAGSEGURO_TOKEN não configurado")
 
-    def _convert_expiration_date(self, expiration_date: str) -> tuple:
-        """Converte data no formato YYYY-MM para exp_month e exp_year"""
-        try:
-            date = datetime.strptime(expiration_date, '%Y-%m')
-            return date.month, date.year
-        except ValueError:
-            raise ValueError("Data de expiração inválida. Use o formato YYYY-MM")
-
     def _build_headers(self):
         return {
             "Authorization": f"Bearer {self.token}",
@@ -174,8 +166,6 @@ class PagSeguroPayment:
                 ),
                 installments=payment_data.get('installments', 1)
             )
-            
-            exp_month, exp_year = self._convert_expiration_date(payment_data['card_data']['expiration_date'])
             
             card_holder = CardHolder(
                 name=payment_data['card_data']['owner'],
