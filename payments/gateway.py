@@ -125,12 +125,40 @@ class PagSeguroPayment:
 
         return payment_method_data
 
+    def _normalize_payment_method(self, method: str) -> PaymentMethod:
+        """Normaliza o método de pagamento para o enum correto"""
+        method = str(method).lower().strip()
+        
+        credit_variations = [
+            'credit', 'credito', 'crédito', 'crédit', 
+            'cartao de credito', 'cartão de crédito',
+            'cartao credito', 'cartão crédito'
+        ]
+        
+        debit_variations = [
+            'debit', 'debito', 'débito', 'débit',
+            'cartao de debito', 'cartão de débito',
+            'cartao debito', 'cartão débito'
+        ]
+        
+        pix_variations = ['pix', 'PIX']
+        
+        if method in credit_variations:
+            return PaymentMethod.CREDIT_CARD
+        elif method in debit_variations:
+            return PaymentMethod.DEBIT_CARD
+        elif method in pix_variations:
+            return PaymentMethod.PIX
+        else:
+            raise ValueError(f"Método de pagamento '{method}' não suportado")
+
     def process_payment(self, payment_data: dict):
         """
         Processa um pagamento usando o PagBank/PagSeguro
         """
         try:
-            payment_method = PaymentMethod[payment_data.get('payment_method')]
+            # Usa a função de normalização
+            payment_method = self._normalize_payment_method(payment_data.get('payment_method'))
             
             customer = Customer(
                 name=payment_data['customer']['name'],
