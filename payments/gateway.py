@@ -9,9 +9,9 @@ import uuid
 
 @dataclass
 class Phone:
-    country: str
     area: str
     number: str
+    country: str = "55"
     type: str = "MOBILE"
 
 @dataclass
