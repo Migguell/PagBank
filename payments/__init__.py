@@ -10,8 +10,7 @@ from .gateway import (
     Address,
     Phone,
     Item,
-    AuthenticationMethod,
-    _normalize_payment_method
+    AuthenticationMethod
 )
 from .validators import PaymentValidators
 from .enums import PaymentMethod
@@ -34,6 +33,5 @@ __all__ = [
     "Phone",
     "Item",
     "AuthenticationMethod",
-    "PaymentValidators",
-    "_normalize_payment_method"
+    "PaymentValidators"
 ]
