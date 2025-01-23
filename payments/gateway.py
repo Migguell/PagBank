@@ -6,6 +6,10 @@ from .validators import PaymentValidators
 from .enums import PaymentMethod
 from datetime import datetime
 import uuid
+from dotenv import load_dotenv  # Adiciona import do python-dotenv
+
+# Carrega as variáveis de ambiente
+load_dotenv()
 
 @dataclass
 class Phone:
@@ -107,12 +111,10 @@ class PagSeguroPayment:
                 "number": card_data.number,
                 "exp_month": card_data.exp_month,
                 "exp_year": card_data.exp_year,
-                "cvv": card_data.cvv,
+                "security_code": card_data.cvv,
+                "holder": asdict(card_data.holder)
             }
         }
-
-        if card_data.holder:
-            payment_method_data["card"]["holder"] = asdict(card_data.holder)
 
         if payment_method == PaymentMethod.CREDIT_CARD:
             payment_method_data.update({
@@ -121,7 +123,23 @@ class PagSeguroPayment:
                 "soft_descriptor": payment_config.soft_descriptor
             })
         elif payment_method == PaymentMethod.DEBIT_CARD:
-            payment_method_data["authentication_method"] = asdict(card_data.authentication_method)
+            # Verifica se todas as variáveis necessárias estão configuradas
+            threeds_type = os.getenv('THREEDS_TYPE')
+            threeds_id = os.getenv('THREEDS_ID')
+            threeds_cavv = os.getenv('THREEDS_CAVV')
+            threeds_eci = os.getenv('THREEDS_ECI')
+            
+            if not all([threeds_type, threeds_id, threeds_cavv, threeds_eci]):
+                raise ValueError("Variáveis de ambiente para autenticação 3DS não configuradas")
+            
+            payment_method_data.update({
+                "authentication_method": {
+                    "type": threeds_type,
+                    "id": threeds_id,
+                    "cavv": threeds_cavv,
+                    "eci": threeds_eci
+                }
+            })
 
         return payment_method_data
 
