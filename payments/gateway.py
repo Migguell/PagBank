@@ -148,15 +148,19 @@ class PagSeguroPayment:
         method = str(method).lower().strip()
         
         credit_variations = [
-            'credit', 'credito', 'crédito', 'crédit', 
-            'cartao de credito', 'cartão de crédito',
-            'cartao credito', 'cartão crédito'
+            'credit', 'credito', 'crédito', 'crédit',
+            'cartao de credito', 'cartão de crédito', 
+            'cartao credito', 'cartão crédito',
+            'credit card', 'creditcard',
+            'cc', 'cartão cred', 'cartao cred'
         ]
         
         debit_variations = [
             'debit', 'debito', 'débito', 'débit',
             'cartao de debito', 'cartão de débito',
-            'cartao debito', 'cartão débito'
+            'cartao debito', 'cartão débito',
+            'debit card', 'debitcard',
+            'dc', 'cartão deb', 'cartao deb'
         ]
         
         pix_variations = ['pix', 'PIX']
