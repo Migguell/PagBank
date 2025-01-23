@@ -114,14 +114,19 @@ class PagSeguroPayment:
 
     def _build_card_payment(self, payment_method: PaymentMethod, card_data: CardData, payment_config: PaymentConfig) -> Dict:
         self.logger.debug(f"Construindo dados de pagamento para método: {payment_method}")
+            
+        # Log seguro (mascarado)
+        self.logger.debug(f"Card number: ****{card_data.number[-4:]}")
+        self.logger.debug("Security code: ***")
         
+        # Dados reais para o payload
         payment_method_data = {
             "type": payment_method.value,
             "card": {
-                "number": f"****{card_data.number[-4:]}",  # Log seguro
+                "number": card_data.number,  # Número real do cartão
                 "exp_month": card_data.exp_month,
                 "exp_year": card_data.exp_year,
-                "security_code": "***",  # Log seguro
+                "security_code": card_data.cvv,  # CVV real
                 "holder": asdict(card_data.holder)
             }
         }
@@ -137,7 +142,16 @@ class PagSeguroPayment:
             self.logger.debug(f"Authentication data: {card_data.authentication_method}")
             payment_method_data["authentication_method"] = card_data.authentication_method
 
-        self.logger.debug(f"Payload final do pagamento: {payment_method_data}")
+        # Log seguro do payload final (mascarando dados sensíveis)
+        safe_payload = {**payment_method_data}
+        if 'card' in safe_payload:
+            safe_payload['card'] = {
+                **safe_payload['card'],
+                'number': f"****{card_data.number[-4:]}",
+                'security_code': '***'
+            }
+        self.logger.debug(f"Payload final do pagamento: {safe_payload}")
+        
         return payment_method_data
 
     def _normalize_payment_method(self, method: str) -> PaymentMethod:
