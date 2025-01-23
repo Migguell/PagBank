@@ -7,6 +7,7 @@ from .enums import PaymentMethod
 from datetime import datetime
 import uuid
 from dotenv import load_dotenv  # Adiciona import do python-dotenv
+import logging
 
 # Carrega as variáveis de ambiente
 load_dotenv()
@@ -96,6 +97,15 @@ class PagSeguroPayment:
         if not self.token:
             raise ValueError("PAGSEGURO_TOKEN não configurado")
 
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.DEBUG)
+        
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        console_handler.setFormatter(formatter)
+        self.logger.addHandler(console_handler)
+
     def _build_headers(self):
         return {
             "Authorization": f"Bearer {self.token}",
@@ -103,13 +113,15 @@ class PagSeguroPayment:
         }
 
     def _build_card_payment(self, payment_method: PaymentMethod, card_data: CardData, payment_config: PaymentConfig) -> Dict:
+        self.logger.debug(f"Construindo dados de pagamento para método: {payment_method}")
+        
         payment_method_data = {
             "type": payment_method.value,
             "card": {
-                "number": card_data.number,
+                "number": f"****{card_data.number[-4:]}",  # Log seguro
                 "exp_month": card_data.exp_month,
                 "exp_year": card_data.exp_year,
-                "security_code": card_data.cvv,
+                "security_code": "***",  # Log seguro
                 "holder": asdict(card_data.holder)
             }
         }
@@ -120,17 +132,12 @@ class PagSeguroPayment:
                 "capture": payment_config.capture or True,
                 "soft_descriptor": payment_config.soft_descriptor
             })
-        elif payment_method == PaymentMethod.DEBIT_CARD:
-            # Valores de autenticação 3DS fixos no código
-            payment_method_data.update({
-                "authentication_method": {
-                    "type": "THREEDS",
-                    "id": "3DS_1",
-                    "cavv": "AAABAWFlmQAAAABjRWWZEEFgFz+=",
-                    "eci": "05"
-                }
-            })
+        elif payment_method == PaymentMethod.DEBIT_CARD and card_data.authentication_method:
+            self.logger.debug("Adicionando dados de autenticação 3DS ao payload")
+            self.logger.debug(f"Authentication data: {card_data.authentication_method}")
+            payment_method_data["authentication_method"] = card_data.authentication_method
 
+        self.logger.debug(f"Payload final do pagamento: {payment_method_data}")
         return payment_method_data
 
     def _normalize_payment_method(self, method: str) -> PaymentMethod:
@@ -237,7 +244,7 @@ class PagSeguroPayment:
     def create_payment(self, customer: Customer, address: Address, items: List[Item],
                       payment_method: PaymentMethod, payment_config: PaymentConfig,
                       card_data: Optional[CardData] = None) -> Dict:
-        
+        self.logger.info("Iniciando criação de pagamento no PagSeguro")
         PaymentValidators.validate_customer_data(asdict(customer))
         PaymentValidators.validate_address(asdict(address))
         PaymentValidators.validate_payment_config(asdict(payment_config))
@@ -282,6 +289,12 @@ class PagSeguroPayment:
                 },
                 "payment_method": self._build_card_payment(payment_method, card_data, payment_config)
             }]
+
+        if payment_method == PaymentMethod.DEBIT_CARD:
+            # Garante que o payment_method_data está no nível correto do JSON
+            base_payment_data["charges"][0]["payment_method"] = self._build_card_payment(
+                payment_method, card_data, payment_config
+            )
 
         response = requests.post(
             f"{self.base_url}/orders",
