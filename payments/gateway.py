@@ -103,8 +103,6 @@ class PagSeguroPayment:
         }
 
     def _build_card_payment(self, payment_method: PaymentMethod, card_data: CardData, payment_config: PaymentConfig) -> Dict:
-        PaymentValidators.validate_payment_method(payment_method, asdict(card_data))
-        
         payment_method_data = {
             "type": payment_method.value,
             "card": {

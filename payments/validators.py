@@ -206,8 +206,6 @@ class PaymentValidators:
             if payment_method == PaymentMethod.DEBIT_CARD:
                 if not card_data.get('holder'):
                     raise ValueError("Dados do titular são obrigatórios para cartão de débito")
-                if not card_data.get('authentication_method'):
-                    raise ValueError("Método de autenticação é obrigatório para cartão de débito")
 
         return True
 
