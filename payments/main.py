@@ -23,7 +23,7 @@ credit_card = CardData(
     number=os.getenv('CREDIT_CARD_NUMBER'),
     exp_month=int(os.getenv('CREDIT_CARD_EXP_MONTH')),
     exp_year=int(os.getenv('CREDIT_CARD_EXP_YEAR')),
-    security_code=os.getenv('CREDIT_CARD_SECURITY_CODE'),
+    cvv=os.getenv('CREDIT_CARD_SECURITY_CODE'),
     store=os.getenv('CREDIT_CARD_STORE', 'True').lower() == 'true',
     holder=CardHolder(
         tax_id=os.getenv('CREDIT_CARD_HOLDER_TAX_ID'),
@@ -57,7 +57,7 @@ debit_card = CardData(
     number=os.getenv('DEBIT_CARD_NUMBER'),
     exp_month=int(os.getenv('DEBIT_CARD_EXP_MONTH')),
     exp_year=int(os.getenv('DEBIT_CARD_EXP_YEAR')),
-    security_code=os.getenv('DEBIT_CARD_SECURITY_CODE'),
+    cvv=os.getenv('DEBIT_CARD_SECURITY_CODE'),
     holder=CardHolder(
         tax_id=os.getenv('DEBIT_CARD_HOLDER_TAX_ID'),
         name=os.getenv('DEBIT_CARD_HOLDER_NAME'),
