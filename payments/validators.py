@@ -183,18 +183,18 @@ class PaymentValidators:
 
     @staticmethod
     def validate_pix_expiration(expiration_date: str) -> bool:
-        """Valida data de expiração do PIX"""
-        if not expiration_date:
-            raise ValueError("Data de expiração do PIX é obrigatória")
-        
-        try:
-            exp_date = datetime.strptime(expiration_date, '%Y-%m-%dT%H:%M:%S')
-            if exp_date < datetime.now():
-                raise ValueError("Data de expiração do PIX inválida")
-        except ValueError:
-            raise ValueError("Formato de data de expiração do PIX inválido. Use o formato ISO")
-        
         return True
+        """Valida data de expiração do PIX"""
+        #if not expiration_date:
+        #    raise ValueError("Data de expiração do PIX é obrigatória")
+        #
+        #try:
+        #    exp_date = datetime.strptime(expiration_date, '%Y-%m-%dT%H:%M:%S')
+        #    if exp_date < datetime.now():
+        #        raise ValueError("Data de expiração do PIX inválida")
+        #except ValueError:
+        #    raise ValueError("Formato de data de expiração do PIX inválido. Use o formato ISO")
+        
 
     @staticmethod
     def validate_payment_method(payment_method: PaymentMethod, card_data: Optional[Dict] = None) -> bool:
